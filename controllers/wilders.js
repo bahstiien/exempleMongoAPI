@@ -17,7 +17,7 @@ module.exports = {
   },
 
   // GET ALL THE WILDER
-  retrieve: async (req, res, next) => {
+  retrieveAll: async (req, res, next) => {
     await WilderModel.init();
 
     try {
@@ -32,13 +32,32 @@ module.exports = {
     }
   },
 
-  update: async (req, res, next) => {
+  // GET A WILDER
+
+  findById: async (req, res, next) => {
+    await WilderModel.init();
+
+    try {
+      const result = await WilderModel.findById({ _id: req.params.id });
+      if (!result) {
+        res.status(500).json({ message: "No wilder found" });
+      } else {
+        res.json({ success: true, result: result });
+      }
+    } catch (err) {
+      res.json({ success: false, result: err });
+    }
+  },
+
+  // UPDATE A WILDER
+
+  updateById: async (req, res, next) => {
     await WilderModel.init();
 
     try {
       const result = await WilderModel.findOneAndUpdate(
         {
-          name: req.body.name,
+          _id: req.params.id,
         },
         req.body
       );
@@ -52,11 +71,11 @@ module.exports = {
     }
   },
 
-  delete: async (req, res, next) => {
+  deleteById: async (req, res, next) => {
     await WilderModel.init();
 
     try {
-      const result = await WilderModel.deleteOne({ _id: req.body._id });
+      const result = await WilderModel.deleteOne({ _id: req.params.id });
       if (!result) {
         res.status(500).json({ message: "No wilder found" });
       } else {

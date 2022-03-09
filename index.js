@@ -16,30 +16,21 @@ mongoose
 
 app.get("/", (req, res, next) => {
   res.send("Hello World");
-
-  WilderModel.init().then(() => {
-    const firstWilder = new WilderModel({
-      name: "First Wilder",
-      city: "San Francisco",
-      skills: [
-        { title: "HTML", votes: 10 },
-        { title: "React", votes: 5 },
-      ],
-    });
-    firstWilder
-      .save()
-      .then((result) => {
-        console.log("success:", result);
-      })
-      .catch((err) => {
-        console.log("error:", err);
-      });
-  });
 });
 app.use(express.json());
+
+// CREATE A WILDER
 app.post("/api/wilder/create", wilderController.create);
-app.get("/api/wilder/retrieve", wilderController.retrieve);
-app.post("/api/wilder/update", wilderController.update);
-app.delete("/api/wilder/delete", wilderController.delete);
+
+// READ
+app.get("/api/wilder/retrieve", wilderController.retrieveAll);
+app.get("/api/wilder/retrieve/:id", wilderController.findById);
+
+// UPDATE A WIDLER BY ID
+app.put("/api/wilder/update/:id", wilderController.updateById);
+
+// DELETE A WILDER BY ID
+app.delete("/api/wilder/delete/:id", wilderController.deleteById);
+
 //Start Server
 app.listen(3000, () => console.log("Server started on 3000"));
