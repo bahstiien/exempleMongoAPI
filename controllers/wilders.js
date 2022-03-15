@@ -1,88 +1,52 @@
+const { restart } = require("nodemon");
 const WilderModel = require("../models/Wilder");
 
 module.exports = {
   // CREATE A WILDER
-  create: (req, res) => {
-    WilderModel.init().then(() => {
+  create: async (req, res, next) => {
+    try {
+      await WilderModel.init();
+
       const wilder = new WilderModel(req.body);
-      wilder
-        .save()
-        .then((result) => {
-          res.json({ success: true, result: result });
-        })
-        .catch((err) => {
-          res.json({ success: false, result: err });
-        });
-    });
+      const result = await wilder.save();
+      res.json(result);
+    } catch (err) {
+      if (err.code === 11000) {
+        res.status(400).json({ message: "Wilder déjà connu" });
+      }
+      throw err;
+    }
   },
 
   // GET ALL THE WILDER
-  retrieveAll: async (req, res, next) => {
-    await WilderModel.init();
-
-    try {
-      const result = await WilderModel.find();
-      if (!result) {
-        res.status(500).json({ message: "No wilder found" });
-      } else {
-        res.json({ success: true, result: result });
-      }
-    } catch (err) {
-      res.json({ success: false, result: err });
-    }
+  retrieveAll: async (req, res) => {
+    const result = await WilderModel.find();
+    res.json(result);
   },
 
   // GET A WILDER
 
-  findById: async (req, res, next) => {
-    await WilderModel.init();
-
-    try {
-      const result = await WilderModel.findById({ _id: req.params.id });
-      if (!result) {
-        res.status(500).json({ message: "No wilder found" });
-      } else {
-        res.json({ success: true, result: result });
-      }
-    } catch (err) {
-      res.json({ success: false, result: err });
-    }
+  findById: async (req, res) => {
+    const result = await WilderModel.findOne(req.params.id);
+    res.json(result);
   },
 
   // UPDATE A WILDER
 
-  updateById: async (req, res, next) => {
-    await WilderModel.init();
-
-    try {
-      const result = await WilderModel.findOneAndUpdate(
-        {
-          _id: req.params.id,
-        },
-        req.body
-      );
-      if (!result) {
-        res.status(500).json({ message: "No wilder found" });
-      } else {
-        res.json({ success: true, result: result });
-      }
-    } catch (err) {
-      res.json({ success: false, result: err });
+  updateById: async (req, res) => {
+    const result = await WilderModel.findOneAndUpdate(req.params.id);
+    if (result) {
+      Object.assign(result, req.body);
+      await result.save();
+      res.json(result);
+    } else {
+      res.status(404).json({ message: "On en a pas" });
     }
   },
 
-  deleteById: async (req, res, next) => {
-    await WilderModel.init();
-
-    try {
-      const result = await WilderModel.deleteOne({ _id: req.params.id });
-      if (!result) {
-        res.status(500).json({ message: "No wilder found" });
-      } else {
-        res.json({ success: true, result: result });
-      }
-    } catch (err) {
-      res.json({ success: false, result: err });
-    }
+  deleteById: async (req, res) => {
+    const result = await WilderModel.deleteOne(req.params.id);
+    await wilder.remove();
+    res.json(result);
   },
 };
